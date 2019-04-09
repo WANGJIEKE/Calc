@@ -57,7 +57,7 @@ void Calculator::updateInputByCommand(const CalcCommand&& cmd) noexcept {
     updateInputByCommand(cmd);
 }
 
-#if CMAKE_BUILD_TYPE == DEBUG
+#if CMAKE_BUILD_TYPE == DEBUG || defined(DEBUG)
 void Calculator::setCurrentInput(const std::string& input) {
     inputFieldList.front() = input;
 }

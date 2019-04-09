@@ -32,7 +32,7 @@ public:
     void updateInputByCommand(const CalcCommand& cmd) noexcept;
     void updateInputByCommand(const CalcCommand&& cmd) noexcept;
 
-#if CMAKE_BUILD_TYPE == DEBUG || DEBUG  // this member function is for debug only
+#if CMAKE_BUILD_TYPE == DEBUG || defined(DEBUG)  // this member function is for debug only
     void setCurrentInput(const std::string& input);
 #endif
 };
