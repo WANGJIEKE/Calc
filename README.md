@@ -16,4 +16,6 @@ c++ src/CalcCommand.cpp src/CalcException.cpp src/Calculator.cpp src/main.cpp \
 ```
 
 ## Testing
-This project comes with unit tests, using googletest.
+This project comes with unit tests, using [googletest](https://github.com/google/googletest). Although all test cases 
+are provided in `test` folder, you have to set up the test framework by your self. Read the instruction in 
+`CMakeLists.txt` for more information.
