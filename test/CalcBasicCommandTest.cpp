@@ -212,10 +212,20 @@ namespace {
     }
 
     GTEST_TEST(CalcBasicCommandTest, extraTestCase3) {
-        Calculator c{};
-        c.updateInputByCommand(CalcCommand::makeDigitInput('1'));
-        ASSERT_EQ(c.getCurrentInput(), "1");
-        c.updateInputByCommand(CalcCommand::makeDigitInput('3'));
-        ASSERT_EQ(c.getCurrentInput(), "13");
+        {
+            Calculator c{};
+            c.updateInputByCommand(CalcCommand::makeDigitInput('1'));
+            ASSERT_EQ(c.getCurrentInput(), "1");
+            c.updateInputByCommand(CalcCommand::makeDigitInput('3'));
+            ASSERT_EQ(c.getCurrentInput(), "13");
+        }
+
+        {
+            Calculator c{};
+            c.updateInputByCommand(CalcCommand::makeDigitInput('0'));
+            ASSERT_EQ(c.getCurrentInput(), "0");
+            c.updateInputByCommand(CalcCommand::makeDigitInput('0'));
+            ASSERT_EQ(c.getCurrentInput(), "0");
+        }
     }
 }

@@ -74,9 +74,9 @@ void Calculator::handleDigitInput(char digit) {
             currentInput += digit;
         }
     } else {
-        if (currentInput[0] == '0' && digit != '0') {
-            currentInput[0] = digit;
-        } else {
+        if (currentInput[0] == '0') {
+            if (digit != '0') currentInput[0] = digit;
+        } else if (currentInput[0] != '0') {
             currentInput += digit;
         }
     }
