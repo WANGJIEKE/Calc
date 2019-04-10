@@ -210,4 +210,12 @@ namespace {
         c.updateInputByCommand(CalcCommand::makeDigitInput('3'));
         ASSERT_EQ(c.getCurrentInput(), "-3");
     }
+
+    GTEST_TEST(CalcBasicCommandTest, extraTestCase3) {
+        Calculator c{};
+        c.updateInputByCommand(CalcCommand::makeDigitInput('1'));
+        ASSERT_EQ(c.getCurrentInput(), "1");
+        c.updateInputByCommand(CalcCommand::makeDigitInput('3'));
+        ASSERT_EQ(c.getCurrentInput(), "13");
+    }
 }
