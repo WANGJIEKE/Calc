@@ -2,39 +2,65 @@
 #define CALCULATOR_HPP
 
 #include <string>
-#include <vector>
+#include <utility>
 #include <sstream>
 
-#include "CalcException.hpp"
-#include "CalcCommand.hpp"
+#if CMAKE_BUILD_TYPE == DEBUG || defined(DEBUG)
+    #ifndef IS_DEBUGGING
+    #define IS_DEBUGGING
+    #endif
+#endif
 
 class Calculator {
-private:
-    std::vector<std::string> inputFieldList;
-    char operation;
-
-    void handleDigitInput(char digit);
-    void handleOperatorInput(char operationType);
-    void handleEval();
-    void handleNegateInput();
-    void handleDecimalPointInput();
-    void handlePercentInput();
-    void handleClearInput();
-    void handleDelInput();
-    void handleResetInput();
-
 public:
+    enum Command {
+        Zero,
+        One,
+        Two,
+        Three,
+        Four,
+        Five,
+        Six,
+        Seven,
+        Eight,
+        Nine,
+        Plus,
+        Minus,
+        Multiply,
+        Divide,
+        Eval,
+        DecimalPoint,
+        Negate,
+        Percent,
+        Delete,
+        Clear,
+        Reset
+    };
+
+    enum Op {
+        OpPlus,
+        OpMinus,
+        OpMultiply,
+        OpDivide,
+        OpNone
+    };
+
     Calculator();
     ~Calculator();
 
-    const std::string getCurrentInput() const noexcept;
-    char getActiveOperator() const noexcept;
-    void updateInputByCommand(const CalcCommand& cmd) noexcept;
-    void updateInputByCommand(const CalcCommand&& cmd) noexcept;
+    void makeInput(Command command);
+    std::string getResult() const;
+    Op getActiveOperator() const;
 
-#if CMAKE_BUILD_TYPE == DEBUG || defined(DEBUG)  // this member function is for debug only
-    void setCurrentInput(const std::string& input);
+#ifdef IS_DEBUGGING
+    void setInput(std::string input);
 #endif
+
+private:
+    std::pair<std::string, std::string> inputs;
+    Op op;
+
+    long double static eval_handler(long double operandLeft, long double operandRight, Op operation);
 };
 
 #endif  // CALCULATOR_HPP
