@@ -1,17 +1,29 @@
 #include <iostream>
-
 #include "Calculator.hpp"
-#include "CalcException.hpp"
-#include "CalcCommand.hpp"
 
 const char* prompt = "Calc Interactive Command Line Interface\n"
                      "[0-9] single digit input\t[+-*/] corresponding operator\t[=] eval\n"
                      "[.] decimal point\t[d] delete\t[c] clear\t[r] reset calculator\n"
                      "[n] negate\t[%] divide by 100\n[?] show prompt\t[q] quit";
 
+char OpToChar(Calculator::Op op) {
+    switch (op) {
+        case Calculator::Op::OpPlus:
+            return '+';
+        case Calculator::Op::OpMinus:
+            return '-';
+        case Calculator::Op::OpMultiply:
+            return '*';
+        case Calculator::Op::OpDivide:
+            return '/';
+        case Calculator::Op::OpNone:
+            return '\0';
+    }
+}
+
 void printCalculatorOutput(const Calculator& c) {
-    std::cout << "text output: " << c.getCurrentInput()
-    << " (with active operator " << c.getActiveOperator() << ")" << std::endl;
+    std::cout << "text output: " << c.getResult()
+              << " (with active operator " << OpToChar(c.getActiveOperator()) << ")" << std::endl;
 }
 
 int main() {
@@ -36,51 +48,51 @@ int main() {
             case '7':
             case '8':
             case '9':
-                c.updateInputByCommand(CalcCommand::makeDigitInput(input[0]));
+                c.makeInput(static_cast<Calculator::Command>(input[0] - '0'));
                 printCalculatorOutput(c);
                 break;
             case '+':
-                c.updateInputByCommand(CalcCommand::makePlusInput());
+                c.makeInput(Calculator::Command::Plus);
                 printCalculatorOutput(c);
                 break;
             case '-':
-                c.updateInputByCommand(CalcCommand::makeMinusInput());
+                c.makeInput(Calculator::Command::Minus);
                 printCalculatorOutput(c);
                 break;
             case '*':
-                c.updateInputByCommand(CalcCommand::makeMultiplyInput());
+                c.makeInput(Calculator::Command::Multiply);
                 printCalculatorOutput(c);
                 break;
             case '/':
-                c.updateInputByCommand(CalcCommand::makeDiviseInput());
+                c.makeInput(Calculator::Command::Divide);
                 printCalculatorOutput(c);
                 break;
             case '=':
-                c.updateInputByCommand(CalcCommand::makeEvalInput());
-                printCalculatorOutput(c);
-                break;
-            case '%':
-                c.updateInputByCommand(CalcCommand::makePercentInput());
-                printCalculatorOutput(c);
-                break;
-            case 'n':
-                c.updateInputByCommand(CalcCommand::makeNegateInput());
-                printCalculatorOutput(c);
-                break;
-            case 'd':
-                c.updateInputByCommand(CalcCommand::makeDelInput());
-                printCalculatorOutput(c);
-                break;
-            case 'c':
-                c.updateInputByCommand(CalcCommand::makeClearInput());
-                printCalculatorOutput(c);
-                break;
-            case 'r':
-                c.updateInputByCommand(CalcCommand::makeResetInput());
+                c.makeInput(Calculator::Command::Eval);
                 printCalculatorOutput(c);
                 break;
             case '.':
-                c.updateInputByCommand(CalcCommand::makeDecimalPointInput());
+                c.makeInput(Calculator::Command::DecimalPoint);
+                printCalculatorOutput(c);
+                break;
+            case 'n':
+                c.makeInput(Calculator::Command::Negate);
+                printCalculatorOutput(c);
+                break;
+            case 'd':
+                c.makeInput(Calculator::Command::Delete);
+                printCalculatorOutput(c);
+                break;
+            case 'c':
+                c.makeInput(Calculator::Command::Clear);
+                printCalculatorOutput(c);
+                break;
+            case 'r':
+                c.makeInput(Calculator::Command::Reset);
+                printCalculatorOutput(c);
+                break;
+            case '%':
+                c.makeInput(Calculator::Command::Percent);
                 printCalculatorOutput(c);
                 break;
             case 'q':

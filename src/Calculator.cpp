@@ -1,164 +1,110 @@
 #include "Calculator.hpp"
 
-Calculator::Calculator() : inputFieldList({"0"}), operation('\0') {}
-
+Calculator::Calculator() : inputs{"0", "0"}, op{Op::OpNone} {}
 Calculator::~Calculator() = default;
 
-const std::string Calculator::getCurrentInput() const noexcept {
-    return inputFieldList.front();
-}
-
-char Calculator::getActiveOperator() const noexcept {
-    return operation;
-}
-
-void Calculator::updateInputByCommand(const CalcCommand& cmd) noexcept {
-    switch (cmd.getInputType()) {
-        case Number:
-            handleDigitInput(cmd.getSymbol());
+void Calculator::makeInput(Calculator::Command command) {
+    long double currentOperand = std::stold(inputs.first);
+    long double previousOperand = std::stold(inputs.second);
+    std::stringstream ss;
+    switch (command) {
+        case Command::Zero:
+        case Command::One:
+        case Command::Two:
+        case Command::Three:
+        case Command::Four:
+        case Command::Five:
+        case Command::Six:
+        case Command::Seven:
+        case Command::Eight:
+        case Command::Nine:
+            if (inputs.first == "0") {
+                inputs.first[0] = char('0' + command);
+            } else if (inputs.first == "-0") {
+                inputs.first[1] = char('0' + command);
+            } else {
+                inputs.first += char('0' + command);
+            }
             break;
-        case Plus:
-            handleOperatorInput('+');
+        case Command::Plus:
+        case Command::Minus:
+        case Command::Multiply:
+        case Command::Divide:
+            if (op != Op::OpNone) {
+                ss << eval_handler(previousOperand, currentOperand, op);
+                inputs.first = ss.str();
+            }
+            op = static_cast<Op>(command - Command::Plus);
+            inputs.second = inputs.first;
+            inputs.first = "0";
             break;
-        case Minus:
-            handleOperatorInput('-');
+        case Command::Eval:
+            if (op != Op::OpNone) {
+                ss << eval_handler(previousOperand, currentOperand, op);
+                inputs.second = inputs.first;
+                inputs.first = ss.str();
+                op = Op::OpNone;
+            }
             break;
-        case Multiply:
-            handleOperatorInput('*');
+        case Command::DecimalPoint:
+            if (inputs.first.find('.') == std::string::npos) {
+                inputs.first += '.';
+            }
             break;
-        case Divide:
-            handleOperatorInput('/');
+        case Command::Negate:
+            ss << -currentOperand;
+            inputs.first = ss.str();
             break;
-        case Eval:
-            handleEval();
+        case Command::Percent:
+            ss << currentOperand / 100.0L;
+            inputs.first = ss.str();
             break;
-        case Negate:
-            handleNegateInput();
+        case Command::Delete:
+            if (inputs.first == "0") {
+                break;
+            } else if (inputs.first == "-0") {
+                inputs.first.erase(inputs.first.begin());
+            } else if (inputs.first.size() == 1 || (inputs.first.size() == 2 && inputs.first[0] == '-')) {
+                inputs.first.replace(inputs.first.end() - 1, inputs.first.end(), 1, '0');
+            } else {
+                inputs.first.pop_back();
+            }
             break;
-        case DecimalPoint:
-            handleDecimalPointInput();
-            break;
-        case Percent:
-            handlePercentInput();
-            break;
-        case Clear:
-            handleClearInput();
-            break;
-        case Del:
-            handleDelInput();
+        case Command::Clear:
+            inputs.first = "0";
             break;
         case Reset:
-            handleResetInput();
+            inputs = {"0", "0"};
+            op = Op::OpNone;
             break;
     }
 }
 
-void Calculator::updateInputByCommand(const CalcCommand&& cmd) noexcept {
-    updateInputByCommand(cmd);
+std::string Calculator::getResult() const {
+    return inputs.first;
 }
 
-#if CMAKE_BUILD_TYPE == DEBUG || defined(DEBUG)
-void Calculator::setCurrentInput(const std::string& input) {
-    inputFieldList.front() = input;
+Calculator::Op Calculator::getActiveOperator() const {
+    return op;
+}
+
+#ifdef IS_DEBUGGING
+void Calculator::setInput(std::string input) {
+    std::swap(inputs.first, input);
 }
 #endif
 
-void Calculator::handleDigitInput(char digit) {
-    std::string& currentInput = inputFieldList.front();
-    if (currentInput.size() > 2) {
-        currentInput += digit;
-    } else if (currentInput.size() == 2) {
-        if (currentInput[0] == '-' && currentInput[1] == '0') {
-            currentInput[1] = digit;
-        } else {
-            currentInput += digit;
-        }
-    } else {
-        if (currentInput[0] == '0') {
-            if (digit != '0') currentInput[0] = digit;
-        } else if (currentInput[0] != '0') {
-            currentInput += digit;
-        }
-    }
-}
-
-void Calculator::handleOperatorInput(char operationType) {
-    if (inputFieldList.size() >= 2) {
-        handleEval();
-    }
-    inputFieldList.insert(inputFieldList.begin(), "0");
-    operation = operationType;
-}
-
-void Calculator::handleEval() {
-    std::stringstream ss;
+long double Calculator::eval_handler(long double operandLeft, long double operandRight, Op operation) {
     switch (operation) {
-        case '+':
-            ss << std::stod(inputFieldList.back()) + std::stod(inputFieldList.front());
-            inputFieldList.front() = ss.str();
-            break;
-        case '-':
-            ss << std::stod(inputFieldList.back()) - std::stod(inputFieldList.front());
-            inputFieldList.front() = ss.str();
-            break;
-        case '*':
-            ss << std::stod(inputFieldList.back()) * std::stod(inputFieldList.front());
-            inputFieldList.front() = ss.str();
-            break;
-        case '/':
-            ss << std::stod(inputFieldList.back()) / std::stod(inputFieldList.front());
-            inputFieldList.front() = ss.str();
-            break;
-        default:
-            return;
+        case Op::OpPlus:
+            return operandLeft + operandRight;
+        case Op::OpMinus:
+            return operandLeft - operandRight;
+        case Op::OpMultiply:
+            return operandLeft * operandRight;
+        case Op::OpDivide:
+            return operandLeft / operandRight;
+        case Op::OpNone:
+            return operandRight;
     }
-    inputFieldList.pop_back();
-    operation = '\0';
-}
-
-void Calculator::handleNegateInput() {
-    if (inputFieldList.front()[0] == '-') {
-        inputFieldList.front().erase(inputFieldList.front().begin());
-    } else {
-        inputFieldList.front() = '-' + inputFieldList.front();
-    }
-}
-
-void Calculator::handleDecimalPointInput() {
-    std::string& currentInput = inputFieldList.front();
-    if (currentInput.find('.') == std::string::npos) {
-        currentInput += '.';
-    }
-}
-
-void Calculator::handlePercentInput() {
-    std::string& currentInput = inputFieldList.front();
-    if (currentInput == "0") return;
-    if (currentInput == "0.") {
-        currentInput.erase(currentInput.end() - 1);
-        return;
-    }
-    std::stringstream ss;
-    ss << std::stod(currentInput) / 100.0;
-    currentInput = ss.str();
-}
-
-void Calculator::handleClearInput() {
-    inputFieldList.front() = "0";
-}
-
-void Calculator::handleDelInput() {
-    std::string& currentInput = inputFieldList.front();
-    if (currentInput == "0") return;
-    if (currentInput.size() == 2 && currentInput[0] == '-') {
-        if (currentInput[1] == '0') currentInput.erase(currentInput.begin());
-        else currentInput[1] = '0';
-    }
-    else if (currentInput.size() == 1) currentInput = "0";
-    else currentInput.erase(currentInput.end() - 1);
-}
-
-void Calculator::handleResetInput() {
-    operation = '\0';
-    inputFieldList = {"0"};
 }
