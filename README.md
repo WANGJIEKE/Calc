@@ -11,8 +11,7 @@ You can try this simple calculator by compiling it with a simple interactive com
 following command at the root of project directory:
 ```bash
 mkdir out
-c++ src/CalcCommand.cpp src/CalcException.cpp src/Calculator.cpp src/main.cpp \
-	-Iinclude --std=c++11 -o out/Calculator
+c++ src/Calculator.cpp src/main.cpp -Iinclude --std=c++11 -o out/Calculator
 ```
 
 ## Testing
